@@ -1,0 +1,21 @@
+[project]
+name = "af3-cryptic"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "biopandas>=0.5.1",
+    "biopython>=1.85",
+    "fastapi>=0.119.0",
+    "matplotlib>=3.10.6",
+    "pandas>=2.3.2",
+    "polars>=1.33.0",
+    "pyarrow>=21.0.0",
+    "rdkit>=2025.9.1",
+    "requests>=2.32.5",
+    "ruff>=0.13.1",
+    "scipy>=1.16.1",
+    "seaborn>=0.13.2",
+    "tqdm>=4.67.1",
+]
