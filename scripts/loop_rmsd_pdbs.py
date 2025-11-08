@@ -42,10 +42,11 @@ def download_pdb(pdb_id):
         cmd.delete("*")
 
         return output_file
-    except Exception as e:
-        print(f"Error downloading PDB {pdb_id}: {e}")
-        return None
 
+    except Exception as e:
+        cmd.load(f"{pdb_id_clean}.cif")
+        output_file = f"{pdb_id_clean}.cif"
+    return output_file
 
 def safe_three_to_one(resname):
     try:
@@ -70,6 +71,31 @@ def load_structure(pdb_file, structure_id):
 
 from scipy.spatial.distance import cdist
 
+def map_residues_by_number(ref_chain, mobile_chain):
+    """
+    Map residues between two chains based solely on residue number.
+
+    Args:
+        ref_chain (Chain): Chain from the reference structure (e.g., crystal).
+        mobile_chain (Chain): Chain from the aligned structure.
+
+    Returns:
+        dict: Mapping of ref_residue -> mobile_residue based on residue number.
+    """
+    # Keep only amino acid residues
+    ref_residues = [res for res in ref_chain if is_aa(res)]
+    mobile_residues = [res for res in mobile_chain if is_aa(res)]
+
+    # Build lookup table for mobile residues by residue number
+    mobile_lookup = {res.get_id()[1]: res for res in mobile_residues}
+
+    residue_map = {}
+    for ref_res in ref_residues:
+        ref_num = ref_res.get_id()[1]
+        if ref_num in mobile_lookup:
+            residue_map[ref_res] = mobile_lookup[ref_num]
+
+    return residue_map
 
 def map_residues_by_coordinates(ref_chain, mobile_chain, threshold=10):
     """
@@ -149,9 +175,125 @@ def find_interacting_residues(structure, startres, endres):
 
     return interacting_residues
 
+def segment_maps_to_consecutive_numbers(
+    segment_residues,
+    residue_map,
+    require_increasing=True,
+    allow_icodeless_fallback=True,
+    prefer_ref_if_endpoints_match=True,
+):
+    """
+    Verify that a reference segment maps to consecutive residue *numbers* on the mobile chain.
+    If the mapped segment's endpoints have the same numbers as the original segment, prefer the
+    original reference segment for downstream use.
+
+    Returns
+    -------
+    ok : bool
+    info : dict
+        {
+          "ref_numbers": [...],
+          "mob_numbers": [...],
+          "missing_refs": [...],
+          "reason": "...",
+          "use_ref_segment": bool,      # NEW: True if you should use the original ref segment
+          "chosen_segment": [...],      # NEW: list[Residue] to use (when use_ref_segment=True)
+        }
+    """
+    # --- Build robust ID-based lookup so different Residue instances still match ---
+    id_map_exact = {k.get_id(): v for k, v in residue_map.items()}
+
+    if allow_icodeless_fallback:
+        from collections import defaultdict
+        by_num = defaultdict(list)
+        for k in residue_map.keys():
+            by_num[k.get_id()[1]].append(k.get_id())
+    else:
+        by_num = None
+
+    # Sort the reference segment by (number, icode)
+    def ref_sort_key(res):
+        het, num, icode = res.get_id()
+        return (num, icode if icode is not None else " ")
+
+    refs_sorted = sorted(segment_residues, key=ref_sort_key)
+    ref_numbers = [r.get_id()[1] for r in refs_sorted]
+
+    # Resolve mapping for each residue in the segment
+    missing = []
+    mobile_mapped = []
+    for r in refs_sorted:
+        rid = r.get_id()
+        mob = id_map_exact.get(rid)
+        if mob is None and allow_icodeless_fallback:
+            num = rid[1]
+            candidates = by_num.get(num, [])
+            if len(candidates) == 1:
+                mob = id_map_exact.get(candidates[0])
+        if mob is None:
+            missing.append(r)
+        else:
+            mobile_mapped.append(mob)
+
+    if missing:
+        return False, {
+            "ref_numbers": ref_numbers,
+            "mob_numbers": [],
+            "missing_refs": [r.get_id()[1] for r in missing],
+            "reason": "Some reference residues are not mapped (ID mismatch / absent).",
+            "use_ref_segment": False,
+        }
+
+    # Extract mapped numbers (ignore insertion codes per your spec)
+    mob_numbers = [m.get_id()[1] for m in mobile_mapped]
+
+    # NEW: endpoint rule — if endpoints match, prefer using the original ref segment
+    if prefer_ref_if_endpoints_match and len(ref_numbers) >= 2 and len(mob_numbers) >= 2:
+        if (ref_numbers[0] == mob_numbers[0]) and (ref_numbers[-1] == mob_numbers[-1]):
+            return True, {
+                "ref_numbers": ref_numbers,
+                "mob_numbers": mob_numbers,
+                "missing_refs": [],
+                "reason": "Endpoints match; using original reference segment.",
+                "use_ref_segment": True,
+                "chosen_segment": refs_sorted,   # these are the Residue objects to use
+            }
+
+    # Usual consecutiveness check
+    if len(mob_numbers) <= 1:
+        return True, {
+            "ref_numbers": ref_numbers,
+            "mob_numbers": mob_numbers,
+            "missing_refs": [],
+            "reason": "OK (trivial segment length).",
+            "use_ref_segment": False,
+        }
+
+    diffs = [mob_numbers[i + 1] - mob_numbers[i] for i in range(len(mob_numbers) - 1)]
+    if require_increasing:
+        ok = all(d == 1 for d in diffs)
+    else:
+        ok = (all(d == 1 for d in diffs) or all(d == -1 for d in diffs))
+
+    if not ok:
+        return False, {
+            "ref_numbers": ref_numbers,
+            "mob_numbers": mob_numbers,
+            "missing_refs": [],
+            "reason": "Mobile residue numbers are not consecutive in the required direction.",
+            "use_ref_segment": False,
+        }
+
+    return True, {
+        "ref_numbers": ref_numbers,
+        "mob_numbers": mob_numbers,
+        "missing_refs": [],
+        "reason": "OK",
+        "use_ref_segment": False,  # endpoints didn't match, so keep normal mapped behavior
+    }
 
 def calculate_rmsd(
-    ref_structure, ref_chain_id, mobile_structure, mobile_chain_id, interacting_residues
+    ref_structure, ref_chain_id, mobile_structure, mobile_chain_id, interacting_residues, other_chain
 ):
     """
     Calculates RMSD between reference and mobile structures using only alpha-carbon atoms.
@@ -168,8 +310,17 @@ def calculate_rmsd(
     mobile_chain = mobile_structure[0][mobile_chain_id]
     # Map residues by Cα atom proximity
     residue_map = map_residues_by_coordinates(ref_chain, mobile_chain)
+    consecutive, stuff = segment_maps_to_consecutive_numbers(interacting_residues, residue_map)
+    if consecutive == False:
+        other_map = map_residues_by_coordinates(other_chain, mobile_chain)
+        consecutive2, stuff = segment_maps_to_consecutive_numbers(interacting_residues, other_map)
+        if consecutive2 == False:
+            print(stuff)
+            return None
     ref_atoms = []
     mobile_atoms = []
+    if stuff["use_ref_segment"] == True:
+        residue_map = map_residues_by_number(ref_chain, mobile_chain)
     for ref_res in interacting_residues:
         if ref_res in residue_map:
             mobile_res = residue_map[ref_res]
@@ -215,8 +366,9 @@ def main(path, startres, stopres, refchain, refpdbs):
     bu_directories = ["unbound", "bound"]
     directories = ["aligned_to_open", "aligned_to_closed"]
 
-    for budi in bu_directories:
+    for k, budi in enumerate(bu_directories):
         for j, dir in enumerate(directories):
+            opposite_j = 1 - j
             pocket_rmsd = {"model": [], "loop_rmsd": []}
             dirpath = os.path.join(path, budi, dir)
             for file in os.listdir(dirpath):
@@ -228,6 +380,9 @@ def main(path, startres, stopres, refchain, refpdbs):
                 # Download and load the crystal structure
                 crystal_pdb_path = download_pdb(refpdbs[j])
                 crystal_structure = load_structure(crystal_pdb_path, "crystal")
+                # Download and load the crystal structure
+                other_structure = load_structure(os.path.join(path, bu_directories[j], dir, f'{refpdbs[opposite_j].replace('.', '_')}.cif'), "other")
+                other_chain = other_structure[0][refchain[opposite_j]]
 
                 # Find residues interacting with the ligand
                 interacting_residues = find_interacting_residues(
@@ -247,7 +402,7 @@ def main(path, startres, stopres, refchain, refpdbs):
                     refchain[j],
                     aligned_structure,
                     file.split("_")[-1].strip(".cif"),
-                    interacting_residues,
+                    interacting_residues, other_chain
                 )
                 pocket_rmsd["model"].append(file[:-4])
                 pocket_rmsd["loop_rmsd"].append(rmsd)
@@ -263,7 +418,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("path", type=str, help="Path to one of 16 directories (full)")
     args = parser.parse_args()
-    csv_file = "pnas_table.csv"
+    csv_file = "pnas_table_mod.csv"
     subdir = args.path.split("/")[-1]
 
     with open(csv_file, "r") as file:

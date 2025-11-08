@@ -111,7 +111,7 @@ for ax, pdb in zip(axes, pdb_ids):
     ax.tick_params(axis="x", which="major", labelrotation=0)
 
     ax.set_xlim(0.5, max(bin_centers) + 0.5)
-    ax.set_ylim(0, 32)
+    #ax.set_ylim(0, 32)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     ax.minorticks_off()

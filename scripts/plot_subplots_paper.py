@@ -24,6 +24,24 @@ import matplotlib.pyplot as plt
 
 # ---------- Helpers ----------
 
+proteins = {
+    "Bovine β-Lactoglobulin": "BLG",
+    "KRAS": "K-RAS",
+    "MAPK": "MAPK",
+    "Pyruvate Dehydrogenase Kinase": "PDK",
+    "Ribonuclease A": "RNase A",
+    "β-Secretase": "BACE",
+    "TEM β-lactamase": "TEM",
+    "cAMP-dependent protein kinase ": "PKA",
+    "Glutamate receptor 2": "GluR2",
+    "AMPc Beta-Lactamase": "AmpC",
+    "Thrombin": "Thrombin",
+    "ALDBP": "ALDBP",
+    "Myosin II": "Myosin 2",
+    "Ricin": "Ricin",
+    "Androgen receptor": "AR",
+    "Hsp90": "Hsp90",
+ }
 
 def parse_pdb_id(cell: str) -> str:
     """
@@ -125,7 +143,7 @@ def scatter_xy(ax, x: np.ndarray, y: np.ndarray, range: tuple):
     ax.grid(True, linestyle="--", alpha=0.6)
 
 
-def bar_states(ax, states, values):
+def bar_states(ax, states, values, title):
     colors = ["#76acd8", "#dfd1d1", "#746d72"]  # blue, gray, purple
 
     bars = ax.bar(
@@ -140,6 +158,7 @@ def bar_states(ax, states, values):
     ax.set_xlabel("Conformation", fontsize=12)
     max_val = max(values) if values else 1
     ax.set_ylim(0, max_val * 1.15)
+    ax.set_title(f'{title}', fontsize=16)
 
     # add value labels on top of bars
     for bar, val in zip(bars, values):
@@ -163,6 +182,7 @@ def make_figure_for_pdb(
     base_pdb_structures: Path,
     out_dir: Path,
     range: tuple,
+    series_name: str,
 ):
     """
     Build 2x4 grid for given pdb_id and save to out_dir/pdb_id.png
@@ -172,14 +192,14 @@ def make_figure_for_pdb(
 
     # ---- Row 1: bar charts ----
     top_specs = [
-        ("af3_bound", f"AF3 (with ligand) — {pdb_id}"),
-        ("pdb_bound", f"PDB bound — {pdb_id}"),
-        ("af3_unbound", f"AF3 (no ligand) — {pdb_id}"),
-        ("pdb_unbound", f"PDB unbound — {pdb_id}"),
+        ("af3_bound", f"AF3 w/ Ligand"),
+        ("pdb_bound", f"PDB Bound"),
+        ("af3_unbound", f"AF3 w/o Ligand"),
+        ("pdb_unbound", f"PDB Unbound"),
     ]
     for j, (prefix, title) in enumerate(top_specs):
         states, values = counts_for(df_counts, prefix, pdb_id)
-        bar_states(axes[0, j], states, values)
+        bar_states(axes[0, j], states, values, title)
 
     # ---- Row 2: scatter plots ----
     # (1) pnas_af3_lig/1alb/closed_rmsd.csv vs open_rmsd.csv
@@ -206,6 +226,7 @@ def make_figure_for_pdb(
     y4 = safe_read_loop_rmsd(unbound_dir / "open_rmsd.csv")
     scatter_xy(axes[1, 3], x4, y4, range)
 
+    plt.suptitle(f"{proteins.get(series_name)}", fontsize=20, y=0.95)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{pdb_id}.png"
     fig.savefig(out_path, bbox_inches="tight")
@@ -217,7 +238,7 @@ def make_figure_for_pdb(
 
 
 def main():
-    df_csv = Path("pnas_table.csv")
+    df_csv = Path("pnas_table_mod.csv")
     counts_csv = Path("total_state_counts.csv")
     base_pnas_af3_lig = Path("pnas_af3_lig")
     base_pnas_af3_nolig = Path("pnas_af3_nolig")
@@ -240,6 +261,7 @@ def main():
             )
             sys.exit(1)
         df = df.rename({candidates[0]: "af_pdb"})
+    
 
     try:
         df_counts = read_counts_table(counts_csv)
@@ -253,6 +275,7 @@ def main():
     series = df.select("af_pdb").to_series().to_list()
     series_min = df.select("min").to_series().to_list()
     series_max = df.select("max").to_series().to_list()
+    series_name = df.select("name").to_series().to_list()
 
     generated = []
     for i, cell in enumerate(series):
@@ -268,6 +291,7 @@ def main():
                 base_pdb_structures=base_pdb_structures,
                 out_dir=out_dir,
                 range=(series_min[i], series_max[i]),
+                series_name=series_name[i],
             )
             generated.append(str(out_path))
             print(f"[OK] {pdb_id} -> {out_path}")

@@ -144,7 +144,7 @@ def check_ligand_binding(
 
 
 # Example usage
-data = pd.read_csv("pnas_table.csv")
+data = pd.read_csv("pnas_table_mod.csv")
 refs = [
     x if x != data["bound"][i] else data["open"][i]
     for i, x in enumerate(data["closed"])
@@ -158,11 +158,12 @@ dirs = [x.replace(".", "_") for x in directories]
 ref_pdbs = [x.replace(".", "_") for x in refs]
 bound_pdbs = [x.replace(".", "_") for x in bound]
 
-pdb_directory = "pdb_files/"
+pdb_directory = "pdb_structures_final/"
 
 for i, protein in enumerate(dirs):
+    if protein not in ['1RHB_A']:
+        continue
     print(f"Processing files for {protein} and ligand {ligs[i]}")
-    print(bound_pdbs)
     reference_file = [
         file
         for file in os.listdir(f"{pdb_directory}/{protein[:-2]}_pdbs/")
@@ -183,9 +184,12 @@ for i, protein in enumerate(dirs):
             # create bound and unbound directories
             os.makedirs(f"{pdb_directory}/{protein[:-2]}_pdbs/bound", exist_ok=True)
             os.makedirs(f"{pdb_directory}/{protein[:-2]}_pdbs/unbound", exist_ok=True)
-            if check_ligand_binding(test_structure, ref_center) and count_clashes(
+            print(count_clashes(
                 unbound_struct, test_struct, residues
-            ):  # [i]):    # if at same site --> add to bound folder
+            ))
+            if check_ligand_binding(test_structure, ref_center) and count_clashes(
+                unbound_struct, test_struct, residues[i]
+            ):    # if at same site --> add to bound folder
                 shutil.copy(
                     f"{pdb_directory}/{protein[:-2]}_pdbs/{file}",
                     f"{pdb_directory}/{protein[:-2]}_pdbs/bound/{file}",

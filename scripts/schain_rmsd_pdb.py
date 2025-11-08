@@ -172,7 +172,6 @@ def calculate_rmsd(
     residue_map = map_residues_by_coordinates(ref_chain, mobile_chain)
     ref_atoms = []
     mobile_atoms = []
-
     for ref_res in interacting_residues:
         if ref_res in residue_map:
             mobile_res = residue_map[ref_res]
@@ -272,7 +271,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("path", type=str, help="Path to one of 16 directories (full)")
     args = parser.parse_args()
-    csv_file = "pnas_table.csv"
+    csv_file = "pnas_table_mod.csv"
     subdir = args.path.split("/")[-1]
 
     with open(csv_file, "r") as file:

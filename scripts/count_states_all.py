@@ -48,10 +48,10 @@ def find_rmsd(PDB_ID):
     PDB_ID: 4 digit PDB code in the af_pdb column
     """
 
-    PDB_path = f"/pdb_files/{PDB_ID}_pdbs"
+    PDB_path = f"pdb_structures_final/{PDB_ID}_pdbs"
 
     # first find the open PDB ID for passed in AF3_PDB
-    df = pd.read_csv("pnas_table.csv")
+    df = pd.read_csv("pnas_table_mod.csv")
     af_pdb_value = PDB_ID
     matching_rows = df[df["af_pdb"].str[:4] == PDB_ID]
     if not matching_rows.empty:
@@ -62,7 +62,7 @@ def find_rmsd(PDB_ID):
         print(f"No matching entry found for af_pdb '{af_pdb_value}'.")
 
     # find the RMSD of the open_pdb
-    if PDB_ID != "1GHY" and PDB_ID != "3IXJ":  # the two cases where it won't be bound
+    if  PDB_ID != "3IXJ":  # the two cases where it won't be bound
         csv_path = os.path.join(PDB_path, "bound/closed_rmsd.csv")
 
         return scan_CSV(csv_path, open_pdb)
@@ -241,34 +241,33 @@ def update_af3_state_counts(state_counts, folder_path, pdb_id, threshold):
 
 
 # actual code to get results
-pnas_table = pd.read_csv("pnas_table.csv")
+pnas_table = pd.read_csv("pnas_table_mod.csv")
 state_counts = {}
 
 for pdb in pnas_table["af_pdb"]:
-    if pdb == "2BU8.A":  # skipping this one because it has no bound structures
-        pdb = pdb[:4]
-        rmsd = find_rmsd(pdb)
+    pdb = pdb[:4]
+    rmsd = find_rmsd(pdb)
 
-        state_counts[f"rmsd/2_{pdb}"] = rmsd / 2
+    state_counts[f"rmsd/2_{pdb}"] = rmsd / 2
 
-        # call function to update dictionary with PDB values
-        update_state_counts_from_folder(
-            state_counts, f"/pdb_files/{pdb}_pdbs", pdb, float(rmsd) / 2
-        )
+    # call function to update dictionary with PDB values
+    update_state_counts_from_folder(
+        state_counts, f"pdb_structures_final/{pdb}_pdbs", pdb, float(rmsd) / 2
+    )
 
-        # call function to update dictionary with AF3 values of lig and nolig
-        update_af3_state_counts(
-            state_counts, f"/pnas_af3_lig/{pdb.lower()}", pdb, float(rmsd) / 2
-        )
-        update_af3_state_counts(
-            state_counts, f"/pnas_af3_nolig/{pdb.lower()}", pdb, float(rmsd) / 2
-        )
+    # call function to update dictionary with AF3 values of lig and nolig
+    update_af3_state_counts(
+        state_counts, f"pnas_af3_lig/{pdb.lower()}", pdb, float(rmsd) / 2
+    )
+    update_af3_state_counts(
+        state_counts, f"pnas_af3_nolig/{pdb.lower()}", pdb, float(rmsd) / 2
+    )
 
 
 # save the dictionary to a csv and output it
 output = pd.DataFrame(list(state_counts.items()), columns=["State", "Count"])
 
-csv_file_path = "/total_state_counts_pyruvate.csv"
+csv_file_path = "total_state_counts_mod.csv"
 output.to_csv(csv_file_path, index=False)
 
 print(f"CSV file created successfully at: {csv_file_path}")

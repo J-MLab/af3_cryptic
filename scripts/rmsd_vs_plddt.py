@@ -14,22 +14,23 @@ import numpy as np
 
 proteins = {
     "Bovine β-Lactoglobulin": "BLG",
-    "KRAS": "K-RAS",
-    "MAPK": "MAPK",
-    "Pyruvate Dehydrogenase Kinase": "PDK",
-    "Ribonuclease A": "RNase A",
-    "β-Secretase": "BACE",
-    "TEM β-lactamase": "TEM",
-    "cAMP-dependent protein kinase ": "PKA",
-    "Glutamate receptor 2": "GluR2",
-    "AMPc Beta-Lactamase": "AmpC",
-    "Thrombin": "Thrombin",
-    "ALDBP": "ALDBP",
     "Myosin II": "Myosin 2",
+    "TEM β-lactamase": "TEM",
+    "MAPK": "MAPK",
     "Ricin": "Ricin",
-    "Androgen receptor": "AR",
+    "ALDBP": "ALDBP",
+    "Pyruvate Dehydrogenase Kinase": "PDK",
+    "Glutamate receptor 2": "GluR2",
     "Hsp90": "Hsp90",
+    "KRAS": "K-RAS",
+    "Ribonuclease A": "RNase A",
+    "Androgen receptor": "AR",
+    "AMPc Beta-Lactamase": "AmpC",
+    "cAMP-dependent protein kinase ": "PKA",
+    "Thrombin": "Thrombin",
+    "β-Secretase": "BACE"
 }
+
 
 
 def extract_label_from_filename(path):
@@ -42,7 +43,7 @@ def extract_label_from_filename(path):
 
 def main():
     pose_path = Path("pose_rmsds")
-    df_info = pl.read_csv("pnas_table.csv")
+    df_info = pl.read_csv("pnas_table_mod.csv")
     df_info = df_info.with_columns(pl.col("af_pdb").str.to_lowercase())
     af_pdbs = df_info["af_pdb"].to_list()
 
@@ -142,7 +143,7 @@ def main():
 
     fig.tight_layout()
 
-    out_dir = os.path.dirname("plots_out/pose_rmsds.png")
+    out_dir = os.path.dirname("plots_out/")
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
     fig.savefig("plots_out/rmsd_vs_plddt.png", dpi=500)

@@ -6,12 +6,13 @@ from pathlib import Path
 import polars as pl
 from Bio.PDB.MMCIFParser import MMCIFParser
 import numpy as np
+from tqdm import tqdm
 
 parser = MMCIFParser(QUIET=True)
 
 rmsd_csvs = Path("pose_rmsds").glob("*_RMSDs.csv")
 af_models = Path("pnas_af3_lig")
-for file in rmsd_csvs:
+for file in tqdm(rmsd_csvs):
     pLDDT = []
     df = pl.read_csv(file)
     for model in df["pdb_seed"]:
