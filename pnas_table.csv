@@ -1,17 +1,17 @@
 ﻿name,af_pdb,closed,open,bound,lig_id,segment,group,min,max,type
 Bovine β-Lactoglobulin,6GE7.A,1BSQ.A,1GX8.A,1GX8.A,RTL,Ile84 - Asn90,1,8,7,Overlaps with active site
-KRAS,4EPW.A,4EPR.A,4EPV.A,4EPV.A,0QX,"Met67,Tyr71",1,9,9,Fully separate cryptic
-MAPK,2NPQ.A,2ZB1.A,2NPQ.A,2NPQ.A,BOG,Met198,1,10,10,Fully separate cryptic
-Pyruvate Dehydrogenase Kinase,2BU8.A,2BU8.A,2BU2.A,2BU2.A,TF1,Phe31,1,5,5,Fully separate cryptic
-Ribonuclease A,1RHB.A,1RHB.A,2W5K.B,2W5K.B,NDP,His119,1,5,5,Overlaps with active site
-β-Secretase,3IXJ.C,3IXJ.C,1W50.A,3IXJ.C,586,Gly66 - Glu77,1,5,5,Overlaps with active site
+Myosin II,2AKA.A,1D0X.A,1YV3.A,1YV3.A,BIT,"Leu262",3,5,5,Fully separate cryptic
 TEM β-lactamase,1PZO.A,1JWP.A,1PZO.A,1PZO.A,CBT,Ala217 - Leu225,2,7,7,Adjacent to active
-cAMP-dependent protein kinase ,2GFC.A,2GFC.A,2JDS.A,2JDS.A,L20,Thr51 - Arg56,2,10,10,Overlaps with active site
-Glutamate receptor 2,1MY0.B,1MY0.B,1N0T.D,1N0T.D,AT1,Gly136 - Ser142,2,6,6,Overlaps with active site
-AMPc Beta-Lactamase,2BLS.B,2BLS.B,3GQZ.A,3GQZ.A,GF7,Asn289 - Leu293,2,10,10,Adjacent to active
-Thrombin,1GHY.B,1GHY.H,1HAG.E,1GHY.H,121,Gly216 - Lys225,2,12,12,Overlaps with active site
-ALDBP,1ALB.A,1ALB.A,1LIC.A,1LIC.A,HDS,Phe57,2,7,7,Overlaps with active site
-Myosin II,2AKA.A,2AKA.A,1YV3.A,1YV3.A,BIT,"Leu262,Tyr634",3,4,4,Fully separate cryptic
+MAPK,2NPQ.A,2ZB1.A,2NPQ.A,2NPQ.A,BOG,Trp197 - His199,1,6,6,Fully separate cryptic
 Ricin,1RTC.A,1RTC.A,1BR6.A,1BR6.A,PT1,Tyr80,3,6,6,Overlaps with active site
+ALDBP,1ALB.A,1ALB.A,3HK1.A,3HK1.A,B64,Phe57,2,7,7,Overlaps with active site
+Pyruvate Dehydrogenase Kinase,2BU8.A,2BU8.A,2BU2.A,2BU2.A,TF1,Leu29 - Phe31,1,5,5,Fully separate cryptic
+Glutamate receptor 2,1MY0.B,1MY0.B,1N0T.D,1N0T.D,AT1,Gly136 - Ser142,2,6,6,Overlaps with active site
+Hsp90,1YES.A,2QFO.B,1YET.A,1YET.A,GDM,Gly108 - Thr109,3,10,10,Overlaps with active site
+KRAS,4EPW.A,4EPR.A,4EPV.A,4EPV.A,0QX,"Met67,Tyr71",1,9,9,Fully separate cryptic
+Ribonuclease A,1RHB.A,1RHB.A,2W5K.B,2W5K.B,NDP,His119,1,5,5,Overlaps with active site
 Androgen receptor,2AX9.A,2AX9.A,2PIQ.A,2PIQ.A,RB1,"Lys720,Met734",3,4,4,Fully separate cryptic
-Hsp90,1YES.A,2QFO.B,2WI7.A,2WI7.A,2KL,Asn106 - Ile110,3,8,7,Overlaps with active site
+AMPc Beta-Lactamase,2BLS.B,2BLS.B,3GQZ.A,3GQZ.A,GF7,Asn289 - Leu293,2,10,10,Adjacent to active
+cAMP-dependent protein kinase ,2GFC.A,2GFC.A,2JDS.A,2JDS.A,L20,Thr51 - Arg56,2,10,10,Overlaps with active site
+Thrombin,1GHY.B,3BEI.B,1GHY.H,1GHY.H,121,Gly216 - Cys220,2,12,12,Overlaps with active site
+β-Secretase,3IXJ.C,3IXJ.C,1W50.A,3IXJ.C,586,Gly66 - Glu77,1,5,5,Overlaps with active site
