@@ -1,9 +1,9 @@
 name,af_pdb,closed,open,bound,lig_id,segment,group,min,max,type
-Rho guanine nucleotide exchange factor 2,7g8e.B,7g8h.B,7g82.B,7g82.B,UWS,Arg448,1,20,20,Fully separate cryptic
-Formate-tetrahydrofolate ligase,7xzn.C,7xzn.C,7xzo.A,7xzo.A,ATP,"Glu70,Gly71",1,7,7,Overlaps with active site
-Dihydrofolate reductase,7zzx.B,7zzx.B,8a0z.A,8a0z.A,NDP,"Arg78,Ser123,Glu124",1,7,7,Overlaps with active site
-D-alanine--D-alanine ligase A,8evv.A,8evv.A,8evw.A,8evw.A,ATP,Glu237 - His243,1,10,10,Overlaps with active site
-Probable cytosol aminopeptidase,8pzm.A,8pzm.A,8pzy.F,8pzy.F,P03,Gly46 - Lys48,1,7,7,Fully separate cryptic
-"2,3-dihydroxybenzoate-2,3-dehydrogenase",8sc0.A,8sc0.A,8u9a.A,8u9a.A,DBH,"Ile210 - Lys214",1,8,8,Fully separate cryptic
-UDP-glycosyltransferase,6pnt.A,6pnt.A,8sfu.A,8sfu.A,ZWN,Pro80 - Ile85,1,7,7,Fully separate cryptic
-Polyunsaturated fatty acid lipoxygenase ALOX12,8ghc.B,8ghc.B,8ghd.A,8ghd.A,ZR5,Trp176 - Trp197,1,11,11,Fully separate cryptic
+Rho guanine nucleotide exchange factor 2,7g8e.B,7g8h.B,7g82.B,7g82.B,UWS,Arg448,4,20,20,Fully separate cryptic
+Formate-tetrahydrofolate ligase,7xzn.C,7xzn.C,7xzo.A,7xzo.A,ATP,"Glu70,Gly71",1b,7,7,Overlaps with active site
+Dihydrofolate reductase,7zzx.B,7zzx.B,8a0z.A,8a0z.A,NDP,"Arg78,Ser123,Glu124",1b,7,7,Overlaps with active site
+D-alanine--D-alanine ligase A,8evv.A,8evv.A,8evw.A,8evw.A,ATP,Glu237 - His243,1b,10,10,Overlaps with active site
+Probable cytosol aminopeptidase,8pzm.A,8pzm.A,8pzy.F,8pzy.F,P03,Glu45 - Leu49,1c,7,7,Fully separate cryptic
+"2,3-dihydroxybenzoate-2,3-dehydrogenase",8sc0.A,8sc0.A,8u9a.A,8u9a.A,DBH,"Ile210 - Lys214",1c,8,8,Fully separate cryptic
+UDP-glycosyltransferase,6pnt.A,6pnt.A,8sfu.A,8sfu.A,ZWN,Pro80,1b,7,7,Fully separate cryptic
+Polyunsaturated fatty acid lipoxygenase ALOX12,8ghc.B,8ghc.B,8ghd.A,8ghd.A,ZR5,Trp176 - Trp197,1b,11,11,Fully separate cryptic
