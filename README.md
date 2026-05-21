@@ -18,4 +18,4 @@ uv run python python_script.py
 Information about the test cases is available in `pnas_table.csv`.
 
 ### Structures
-Structures are available through a https://doi.org/10.5281/zenodo.18985115
+Structures are available through a https://zenodo.org/records/20330778
